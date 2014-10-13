@@ -1,7 +1,5 @@
 #include "HelloWorldScene.h"
 
-USING_NS_CC;
-
 Scene* HelloWorld::createScene()
 {
     // 'scene' is an autorelease object
@@ -27,65 +25,60 @@ bool HelloWorld::init()
         return false;
     }
     
-    Size visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
-
-    // add a "close" icon to exit the progress. it's an autorelease object
-    auto closeItem = MenuItemImage::create(
-                                           "CloseNormal.png",
-                                           "CloseSelected.png",
-                                           CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
-    
-	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width/2 ,
-                                origin.y + closeItem->getContentSize().height/2));
-
-    // create menu, it's an autorelease object
-    auto menu = Menu::create(closeItem, NULL);
-    menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
-
-    /////////////////////////////
-    // 3. add your codes below...
-
-    // add a label shows "Hello World"
-    // create and initialize a label
-    
-    auto label = LabelTTF::create("Hello World", "Arial", 24);
-    
-    // position the label on the center of the screen
-    label->setPosition(Vec2(origin.x + visibleSize.width/2,
-                            origin.y + visibleSize.height - label->getContentSize().height));
-
-    // add the label as a child to this layer
-    this->addChild(label, 1);
-
-    // add "HelloWorld" splash screen"
-    auto sprite = Sprite::create("HelloWorld.png");
-
-    // position the sprite on the center of the screen
-    sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
-
-    // add the sprite as a child to this layer
-    this->addChild(sprite, 0);
+    GLProgram *program=GLProgram::createWithFilenames("sample3.vert", "sample3.frag");//读取编译顶点着色器脚本内容以及片元着色器脚本内容,并且链接
+//    setGLProgramState(GLProgramState::getOrCreateWithGLProgram(program));等价于setGLProgram
+    setGLProgram(program);
     
     return true;
 }
 
-
-void HelloWorld::menuCloseCallback(Ref* pSender)
+void HelloWorld::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
-	MessageBox("You pressed the close button. Windows Store Apps do not implement a close button.","Alert");
-    return;
-#endif
 
-    Director::getInstance()->end();
+    _customCommand.init(_globalZOrder);
+    _customCommand.func = CC_CALLBACK_0(HelloWorld::onDraw, this, transform, flags);
+    renderer->addCommand(&_customCommand);
+}
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    exit(0);
-#endif
+void HelloWorld::onDraw(const Mat4 &transform, uint32_t flags)
+{
+    Director::getInstance()->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+    Director::getInstance()->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+    
+    Mat4 matrixPerspective,matrixLookup,matrixTranslate;
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    Mat4::createPerspective(60, (GLfloat)visibleSize.width/visibleSize.height, 1, 10, &matrixPerspective);
+    Vec3 eye(0, 0, 3), center(0,0,0), up(0.0f, 1.0f, 0.0f);
+    Mat4::createLookAt(eye, center, up, &matrixLookup);
+    Director::getInstance()->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixPerspective);
+    Director::getInstance()->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixLookup);
+
+    matrixTranslate.translate(0, 0.5, -2);
+    matrixTranslate.rotate(Vec3(1, 0, 0), CC_DEGREES_TO_RADIANS(xAngle++));
+    
+    auto glProgram = getGLProgram();
+    glProgram->use();
+    glProgram->setUniformsForBuiltins(matrixTranslate);
+    float vertices[]={
+        -1,0,0,
+        0,-1,0,
+        1,0,0
+    };
+    float colors[]={
+        0,1,1,1,
+        0.5,0.5f,1,0,
+        1,1,0,0
+    };
+    
+    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+    
+    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
+    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, colors);
+    
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 3);
+    CHECK_GL_ERROR_DEBUG();
+    
+    Director::getInstance()->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
 }
