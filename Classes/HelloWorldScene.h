@@ -2,9 +2,9 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include "SixPointedStar.h"
 
 USING_NS_CC;
-
 class HelloWorld : public cocos2d::Layer
 {
 public:
@@ -14,14 +14,16 @@ public:
     // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
     virtual bool init();
     
-    virtual void draw(Renderer *renderer, const Mat4 &transform, uint32_t flags) override;
+    virtual bool onTouchBegan(Touch *touch, Event *unused_event);
+    virtual void onTouchMoved(Touch *touch, Event *unused_event);
 
-    void onDraw(const Mat4 &transform, uint32_t flags);
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
     
-    CustomCommand _customCommand;
-    float xAngle={0};
+    ~HelloWorld();
+//    CustomCommand _customCommand;
+//    float xAngle={0};
+    SixPointedStar *star[6];
 };
 
 #endif // __HELLOWORLD_SCENE_H__

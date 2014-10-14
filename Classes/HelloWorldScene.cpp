@@ -14,6 +14,15 @@ Scene* HelloWorld::createScene()
     // return the scene
     return scene;
 }
+HelloWorld::~HelloWorld()
+{
+
+    for (int i=0; i<6; i++) {
+        if (star[i]) {
+            star[i]->release();
+        }
+    }
+}
 
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
@@ -24,61 +33,38 @@ bool HelloWorld::init()
     {
         return false;
     }
-    
-    GLProgram *program=GLProgram::createWithFilenames("sample3.vert", "sample3.frag");//读取编译顶点着色器脚本内容以及片元着色器脚本内容,并且链接
-//    setGLProgramState(GLProgramState::getOrCreateWithGLProgram(program));等价于setGLProgram
-    setGLProgram(program);
-    
+    auto listenter=EventListenerTouchOneByOne::create();
+    listenter->onTouchBegan=CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
+    listenter->onTouchMoved=CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listenter, this);
+    for (int i=0; i<6; i++) {
+        star[i]=new SixPointedStar(0.6,1,-0.3*i);
+        if (star[i]) {
+            star[i]->retain();
+            this->addChild(star[i]);
+        }else
+        {
+            return false;
+        }
+
+    }
     return true;
 }
-
-void HelloWorld::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
+bool HelloWorld::onTouchBegan(Touch *touch, Event *unused_event)
 {
 
-    _customCommand.init(_globalZOrder);
-    _customCommand.func = CC_CALLBACK_0(HelloWorld::onDraw, this, transform, flags);
-    renderer->addCommand(&_customCommand);
+    return  true;
 }
-
-void HelloWorld::onDraw(const Mat4 &transform, uint32_t flags)
+void HelloWorld::onTouchMoved(Touch *touch, Event *unused_event)
 {
-    Director::getInstance()->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    Director::getInstance()->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    
-    Mat4 matrixPerspective,matrixLookup,matrixTranslate;
-    Size visibleSize = Director::getInstance()->getVisibleSize();
-    Mat4::createPerspective(60, (GLfloat)visibleSize.width/visibleSize.height, 1, 10, &matrixPerspective);
-    Vec3 eye(0, 0, 3), center(0,0,0), up(0.0f, 1.0f, 0.0f);
-    Mat4::createLookAt(eye, center, up, &matrixLookup);
-    Director::getInstance()->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixPerspective);
-    Director::getInstance()->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixLookup);
+     Vec2 delta=touch->getDelta();
+    for (int i=0; i<6; i++) {
+        if (star[i]) {
 
-    matrixTranslate.translate(0, 0.5, -2);
-    matrixTranslate.rotate(Vec3(1, 0, 0), CC_DEGREES_TO_RADIANS(xAngle++));
-    
-    auto glProgram = getGLProgram();
-    glProgram->use();
-    glProgram->setUniformsForBuiltins(matrixTranslate);
-    float vertices[]={
-        -1,0,0,
-        0,-1,0,
-        1,0,0
-    };
-    float colors[]={
-        0,1,1,1,
-        0.5,0.5f,1,0,
-        1,1,0,0
-    };
-    
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-    
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, 0, colors);
-    
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, 3);
-    CHECK_GL_ERROR_DEBUG();
-    
-    Director::getInstance()->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+            star[i]->xAngle+=delta.x*180/320;
+            star[i]->yAngle+=delta.y*180/320;
+
+        }
+    }
 }
+
