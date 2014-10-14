@@ -38,7 +38,7 @@ bool HelloWorld::init()
     listenter->onTouchMoved=CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listenter, this);
     for (int i=0; i<6; i++) {
-        star[i]=new SixPointedStar(0.6,1,-0.3*i);
+        star[i]=new SixPointedStar(0.3,0.5,-0.3*i);
         if (star[i]) {
             star[i]->retain();
             this->addChild(star[i]);

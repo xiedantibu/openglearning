@@ -24,7 +24,7 @@ SixPointedStar::SixPointedStar(float r,float R,float z)
         return ;
     }
     
-    GLProgram *program=GLProgram::createWithFilenames("sample5_1.vert", "sample5_1.frag");//读取编译顶点着色器脚本内容以及片元着色器脚本内容,并且链接
+    GLProgram *program=GLProgram::createWithFilenames("sample5_2.vert", "sample5_2.frag");//读取编译顶点着色器脚本内容以及片元着色器脚本内容,并且链接
     //    setGLProgramState(GLProgramState::getOrCreateWithGLProgram(program));等价于setGLProgram
     setGLProgram(program);
     
@@ -52,15 +52,12 @@ void SixPointedStar::onDraw(const Mat4 &transform, uint32_t flags)
     glEnable(GL_CULL_FACE);//打开背面剪切
     Director::getInstance()->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     Director::getInstance()->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    Mat4 matrixPerspective,matrixLookup,matrixTranslate;
+    Mat4 orthoMatrix,matrixTranslate;
     Size visibleSize = Director::getInstance()->getVisibleSize();
-    Mat4::createPerspective(60, (GLfloat)visibleSize.width/visibleSize.height, 1, 10, &matrixPerspective);
-    Vec3 eye(0, 0, 3), center(0,0,0), up(0.0f, 1.0f, 0.0f);
-    Mat4::createLookAt(eye, center, up, &matrixLookup);
-    Director::getInstance()->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixPerspective);
-    Director::getInstance()->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, matrixLookup);
+    Mat4::createOrthographicOffCenter(-(visibleSize.width/visibleSize.height), (visibleSize.width/visibleSize.height), -1, 1, 1, 10, &orthoMatrix);
+    Director::getInstance()->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
     
-    matrixTranslate.translate(0, 0, 0);
+    matrixTranslate.translate(0, 0, -5);
     matrixTranslate.rotate(Vec3(1, 0, 0), CC_DEGREES_TO_RADIANS(xAngle));
     matrixTranslate.rotate(Vec3(0, 1, 0), CC_DEGREES_TO_RADIANS(yAngle));
     
