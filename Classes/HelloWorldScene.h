@@ -2,7 +2,7 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
-#include "SixPointedStar.h"
+#include "Cube.h"
 
 USING_NS_CC;
 class HelloWorld : public cocos2d::Layer
@@ -23,7 +23,8 @@ public:
     ~HelloWorld();
 //    CustomCommand _customCommand;
 //    float xAngle={0};
-    SixPointedStar *star[6];
+
+    Cube *cube;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

@@ -16,12 +16,9 @@ Scene* HelloWorld::createScene()
 }
 HelloWorld::~HelloWorld()
 {
-
-    for (int i=0; i<6; i++) {
-        if (star[i]) {
-            star[i]->release();
+        if (cube) {
+            cube->release();
         }
-    }
 }
 
 // on "init" you need to initialize your instance
@@ -37,17 +34,16 @@ bool HelloWorld::init()
     listenter->onTouchBegan=CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
     listenter->onTouchMoved=CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listenter, this);
-    for (int i=0; i<6; i++) {
-        star[i]=new SixPointedStar(0.3,0.5,-0.3*i);
-        if (star[i]) {
-            star[i]->retain();
-            this->addChild(star[i]);
+        cube=new Cube();
+        if (cube) {
+            cube->retain();
+            this->addChild(cube);
         }else
         {
             return false;
         }
 
-    }
+
     return true;
 }
 bool HelloWorld::onTouchBegan(Touch *touch, Event *unused_event)
@@ -57,14 +53,6 @@ bool HelloWorld::onTouchBegan(Touch *touch, Event *unused_event)
 }
 void HelloWorld::onTouchMoved(Touch *touch, Event *unused_event)
 {
-     Vec2 delta=touch->getDelta();
-    for (int i=0; i<6; i++) {
-        if (star[i]) {
 
-            star[i]->xAngle+=delta.x*180/320;
-            star[i]->yAngle+=delta.y*180/320;
-
-        }
-    }
 }
 
