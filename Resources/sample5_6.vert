@@ -5,5 +5,6 @@ varying vec4 vColor;//传递给片元着色器的变量
 void main()
 {
     gl_Position=CC_MVPMatrix * vec4(a_position,1);
+    gl_PointSize=20.0;
     vColor=a_color;
 }
